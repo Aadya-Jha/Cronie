@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const ExecutionSchema = new mongoose.Schema(
   {
@@ -35,4 +35,4 @@ const ExecutionSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Execution", ExecutionSchema);
+export default mongoose.model("Execution", ExecutionSchema);

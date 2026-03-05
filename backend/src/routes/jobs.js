@@ -1,13 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-
-const {
-  createJob,
-  pauseJob,
-  resumeJob,
-  updateJob,
-  deleteJob,
-} = require("../controllers/jobController");
+import { createJob, pauseJob, resumeJob, updateJob, deleteJob } from "../controllers/jobController.js";
 
 router.post("/", createJob);
 router.patch("/:id/pause", pauseJob);
@@ -15,4 +8,4 @@ router.patch("/:id/resume", resumeJob);
 router.put("/:id", updateJob);
 router.delete("/:id", deleteJob);
 
-module.exports = router;
+export default router;

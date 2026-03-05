@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
 const app = express();
+import jobRouter from "./routes/jobs.js";
 
 app.use(express.json());
-app.use("/jobs", require("./routes/jobs"));
+app.use("/jobs", jobRouter);
 
-module.exports = app;
+export default app;

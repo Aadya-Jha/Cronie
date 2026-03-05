@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const JobSchema = new mongoose.Schema(
   {
@@ -19,6 +19,12 @@ const JobSchema = new mongoose.Schema(
     targetUrl: {
     type: String,
     required: true,
+    },
+
+    httpMethod: {
+      type: String,
+      enum: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      default: "GET",
     },
 
     status: {
@@ -53,4 +59,4 @@ const JobSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Job", JobSchema);
+export default mongoose.model("Job", JobSchema);

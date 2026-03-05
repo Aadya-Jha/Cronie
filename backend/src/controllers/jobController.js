@@ -1,6 +1,6 @@
-const Job = require("../models/Job");
+import Job from "../models/Job.js";
 
-exports.createJob = async (req, res) => {
+export const createJob = async (req, res) => {
   try {
     const { name, cronExpression, targetUrl, description } = req.body;
 
@@ -24,7 +24,7 @@ exports.createJob = async (req, res) => {
   }
 };
 
-exports.pauseJob = async (req, res) => {
+export const pauseJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
 
@@ -46,7 +46,7 @@ exports.pauseJob = async (req, res) => {
   }
 };
 
-exports.resumeJob = async (req, res) => {
+export const resumeJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
     if (!job) {
@@ -67,7 +67,7 @@ exports.resumeJob = async (req, res) => {
   }
 };
 
-exports.updateJob = async (req, res) => {
+export const updateJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
 
@@ -95,7 +95,7 @@ exports.updateJob = async (req, res) => {
   }
 };
 
-exports.deleteJob = async (req, res) => {
+export const deleteJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
 
