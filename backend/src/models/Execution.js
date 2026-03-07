@@ -11,7 +11,8 @@ const ExecutionSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "running", "success", "failed"],
+      enum: ["pending", "running", "completed", "failed"],
+      default: "pending",
       required: true,
     },
 

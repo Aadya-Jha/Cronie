@@ -17,8 +17,8 @@ const JobSchema = new mongoose.Schema(
     },
 
     targetUrl: {
-    type: String,
-    required: true,
+      type: String,
+      required: true,
     },
 
     httpMethod: {
@@ -45,7 +45,7 @@ const JobSchema = new mongoose.Schema(
 
     lastRunStatus: {
       type: String,
-      enum: ["success", "failed"],
+      enum: ["completed", "failed"],
       default: null,
     },
 
@@ -55,7 +55,7 @@ const JobSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, 
+    timestamps: true,
   }
 );
 
