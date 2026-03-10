@@ -1,29 +1,21 @@
 # Cronie — Development Timeline
 
 ## Roles
-
-- **Member 1** — Scheduler & Execution Engine  
-- **Member 2** — Data Model & Job Lifecycle  
-- **Member 3** — Reliability & Misuse Analysis  
-- **Member 4** — Execution Tracking & Recovery  
+- **Member 1 — Scheduler & Execution Engine**
+- **Member 2 — Data Model & Job Lifecycle**
+- **Member 3 — Reliability & Misuse Analysis**
+- **Member 4 — Execution Tracking & Recovery**
 
 ---
 
 # Phase 1 — Data Model & Lifecycle (Member 2 Leads)
 
-This phase **must start first** because the entire system depends on the data model.
-
-## Member 2 (Primary Owner)
-
+## Member 2
 Design MongoDB schemas:
-
 - Job schema
-- Execution metadata fields (basic)
-
-Define job lifecycle rules.
+- Execution metadata fields
 
 Implement APIs:
-
 - Create job
 - Update job
 - Pause / Resume job
@@ -32,41 +24,31 @@ Implement APIs:
 Ensure jobs persist across server restarts.
 
 ### Deliverables
-
 - Stable MongoDB schemas
-- Working job CRUD APIs
-- Clearly defined job lifecycle states
+- Job CRUD APIs
+- Job lifecycle rules
 
 ---
 
 ## Member 1
-
-Review schema from a scheduler perspective.
-
-Ensure required fields exist:
-
+Review schema and ensure fields exist:
 - cron expression
 - job status
 - next run time
 
-**Do NOT start scheduler implementation yet.**
+**Do NOT start scheduler yet.**
 
 ---
 
-## Member 3 (Design Support)
-
-Identify misuse cases such as:
-
-- Invalid cron expressions
-- Extremely frequent schedules
-- Potential abuse scenarios
+## Member 3
+Identify misuse cases:
+- invalid cron expressions
+- extremely frequent schedules
 
 ---
 
-## Member 4 (Design Support)
-
+## Member 4
 Define execution status model:
-
 - pending
 - running
 - completed
@@ -76,169 +58,143 @@ Define execution status model:
 
 # Phase 2 — Scheduling & Execution Core (Member 1 Leads)
 
-This phase begins once **Phase 1 schemas are stable**.
-
-## Member 1 (Primary Owner)
-
-Implement cron expression handling.
-
-Build scheduler engine:
-
-- Scheduler loop
-- Time-based job detection
-
-Detect when jobs should run.
-
-Trigger execution only for:
-
-- Active jobs
-
-Execute HTTP API calls.
-
-Handle:
-
-- Success
-- Failure
+## Member 1
+Implement scheduler engine:
+- cron expression handling
+- scheduler loop
+- detect jobs to run
+- execute HTTP API calls
+- handle success / failure
 
 Update job metadata:
-
 - lastRunTime
 - nextRunTime
 
 ### Deliverables
-
 - Jobs execute at correct times
-- Scheduler triggers executions reliably
+- Reliable scheduler execution
 
 ---
 
-## Member 2 (Support)
-
-Help update job lifecycle state after execution.
-
-Ensure lifecycle rules are respected.
+## Member 2
+Ensure lifecycle rules are respected after execution.
 
 ---
 
 ## Member 4
-
-Implement execution tracking storage.
+Implement execution tracking storage:
 
 Store:
-
 - executionId
 - jobId
 - startTime
 - endTime
 - status
-- error (if any)
+- error
 
 ---
 
 ## Member 3
-
-Observe scheduler behavior.
-
-Identify possible failure scenarios:
-
-- Overlapping executions
-- Missed runs
-- Very frequent jobs
+Observe scheduler behavior and identify:
+- overlapping executions
+- missed runs
+- frequent jobs
 
 ---
 
-# Phase 3 — Execution Orchestration & Safety (Members 3 & 4 Lead)
+# Phase 3 — Execution Safety & Observability
 
-At this point the system works, but needs **reliability and safety controls**.
-
-## Member 4 (Primary Owner)
-
+## Member 4
 Implement execution state transitions:
 
-```
 pending → running → completed / failed
-```
 
 Prevent duplicate executions:
+- skip execution if the same job is already running
 
-- Ensure same job cannot run twice simultaneously
+Implement execution history API:
 
-Add basic retry logic:
-
-- Retry failed executions once
-
-Mark interrupted executions correctly.
+GET /jobs/:jobId/executions
 
 ### Deliverables
-
-- Clean execution records
-- Predictable execution behavior
+- execution tracking
+- duplicate execution protection
+- execution history retrieval
 
 ---
 
-## Member 3 (Primary Owner)
+## Member 1
+Implement scheduler safety controls and **rate limiting**.
 
-Define execution constraints:
+Examples:
+- max executions per minute
+- max concurrent executions
+- minimum cron interval
 
-- Maximum schedule frequency
-- Invalid cron detection
-
-Identify abuse scenarios.
-
-Propose safeguards:
-
-- Block extremely frequent jobs
-- Add audit logging fields
+Scheduler should skip jobs that violate limits.
 
 ### Deliverables
-
-- Reliability and safety rules
-- Integrated validation checks
-
----
-
-## Member 1 (Reviewer)
-
-Ensure scheduler respects:
-
-- Execution locks
-- Constraint checks
-
-Minimal scheduler changes only.
+- rate limiting
+- scheduler safety checks
 
 ---
 
-# Phase 4 — Hardening & Integration (All Members)
+## Member 3
+Support testing and identify edge cases:
+- overlapping schedules
+- repeated failures
 
-Final phase focuses on **stability, testing, and documentation**.
+---
 
-## Team Tasks
+# Phase 4 — Integration & Minimal Frontend
 
-Test the full job lifecycle:
+## Member 2
+Build **Jobs Dashboard**
+- list jobs
+- pause / resume / delete
 
-```
-create → schedule → execute → log → retry
-```
+APIs:
+GET /jobs  
+PATCH /jobs/:id  
+DELETE /jobs/:id
 
-Simulate failure scenarios:
+---
 
-- API timeouts
-- Invalid cron expressions
+## Member 3
+Build **Create Job Form**
 
-Fix race conditions.
+Fields:
+- job name
+- cron expression
+- HTTP method
+- target URL
 
-Add structured logging (Winston).
+API:
+POST /jobs
 
-Prepare documentation:
+---
 
-- README
-- Architecture diagrams
+## Member 4
+Build **Execution History View**
+
+Show past job runs.
+
+API:
+GET /jobs/:jobId/executions
+
+---
+
+## Member 1
+Assist with **frontend ↔ backend integration**
+and ensure scheduler updates are reflected correctly.
 
 ---
 
 # Final Deliverables
-
-- Fully integrated Cronie MVP
-- Reliable scheduler & execution engine
-- Execution tracking & logging
-- Documentation and system diagrams
+- Cron job scheduler
+- Webhook/API execution
+- MongoDB persistence
+- Execution tracking
+- Rate limiting
+- Execution history API
+- Minimal frontend dashboard
