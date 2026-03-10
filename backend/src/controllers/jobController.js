@@ -1,4 +1,5 @@
 import Job from "../models/Job.js";
+import { getNextRunTime } from "../scheduler/cronHelper.js";
 
 export const createJob = async (req, res) => {
   try {
@@ -11,16 +12,31 @@ export const createJob = async (req, res) => {
     }
 
     const job = await Job.create({
-      name,
-      description,
-      cronExpression,
-      targetUrl,
-      status: "active",
-    });
+    name,
+    description,
+    cronExpression,
+    targetUrl,
+    status: "active",
+    nextRunAt: getNextRunTime(cronExpression)
+  });
 
     res.status(201).json(job);
   } catch (err) {
-    res.status(500).json({ error: "Failed to create job" });
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getJob = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.json(job);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to retrieve job" });
   }
 };
 

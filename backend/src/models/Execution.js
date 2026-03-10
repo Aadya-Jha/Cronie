@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const ExecutionSchema = new mongoose.Schema(
+const executionSchema = new mongoose.Schema(
   {
     jobId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -36,4 +36,4 @@ const ExecutionSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Execution", ExecutionSchema);
+export default mongoose.model("Execution", executionSchema);
