@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const JobSchema = new mongoose.Schema(
+const jobSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -59,4 +59,4 @@ const JobSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Job", JobSchema);
+export default mongoose.model("Job", jobSchema);
