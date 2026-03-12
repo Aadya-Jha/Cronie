@@ -1,4 +1,5 @@
 import Job from "../models/Job.js";
+import Execution from "../models/Execution.js";
 import { getNextRunTime } from "../scheduler/cronHelper.js";
 
 export const createJob = async (req, res) => {
@@ -12,13 +13,13 @@ export const createJob = async (req, res) => {
     }
 
     const job = await Job.create({
-    name,
-    description,
-    cronExpression,
-    targetUrl,
-    status: "active",
-    nextRunAt: getNextRunTime(cronExpression)
-  });
+      name,
+      description,
+      cronExpression,
+      targetUrl,
+      status: "active",
+      nextRunAt: getNextRunTime(cronExpression),
+    });
 
     res.status(201).json(job);
   } catch (err) {
@@ -74,7 +75,7 @@ export const resumeJob = async (req, res) => {
     }
 
     job.status = "active";
-    job.nextRunAt = null; 
+    job.nextRunAt = getNextRunTime(job.cronExpression);
 
     await job.save();
     res.json(job);
@@ -102,7 +103,7 @@ export const updateJob = async (req, res) => {
     if (cronExpression !== undefined) job.cronExpression = cronExpression;
     if (targetUrl !== undefined) job.targetUrl = targetUrl;
 
-    job.nextRunAt = null;
+    job.nextRunAt = getNextRunTime(job.cronExpression);
 
     await job.save();
     res.json(job);
@@ -126,5 +127,28 @@ export const deleteJob = async (req, res) => {
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ error: "Failed to delete job" });
+  }
+};
+
+export const getExecutionHistory = async (req, res) => {
+  try {
+    const { id: jobId } = req.params;
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+
+    const executions = await Execution.find({ jobId })
+      .sort({ createdAt: -1 })
+      .select("status startedAt finishedAt error createdAt");
+
+    res.json({
+      jobId,
+      jobName: job.name,
+      executions,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to retrieve execution history" });
   }
 };
