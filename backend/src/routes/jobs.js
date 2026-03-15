@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 import {
+  getJobs,
   getJob,
   createJob,
   pauseJob,
@@ -11,6 +12,7 @@ import {
 } from "../controllers/jobController.js";
 
 router.post("/", createJob);
+router.get("/", getJobs);
 router.get("/:id/executions", getExecutionHistory);
 router.get("/:id", getJob);
 router.patch("/:id/pause", pauseJob);
