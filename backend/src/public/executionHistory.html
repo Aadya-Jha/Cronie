@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cronie Execution History</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f9; margin:0; padding:20px; }
+    .card { background:#fff; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.05); padding:16px; max-width:900px; margin:16px auto; }
+    h1 { margin:0 0 8px; }
+    label, select, button, input { font-size:14px; }
+    .row { display:flex; gap:8px; align-items:center; margin-bottom:12px; }
+    .row > * { margin:0; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th, td { border:1px solid #ececec; padding:8px; text-align:left; }
+    th { background:#f9fafb; }
+    .error {color:#a00; margin-bottom:8px;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Cronie Execution History Viewer</h1>
+    <p>Choose a job to display its recent executions.</p>
+    <div id="error" class="error"></div>
+    <div class="row">
+      <select id="jobSelect"><option value="">Loading jobs...</option></select>
+      <button id="refresh">Refresh</button>
+      <button id="clear">Clear</button>
+    </div>
+    <div id="jobInfo"></div>
+    <table>
+      <thead>
+        <tr><th>Status</th><th>Started</th><th>Finished</th><th>Error</th><th>Recorded</th></tr>
+      </thead>
+      <tbody id="executions"></tbody>
+    </table>
+  </div>
+  <script>
+    const error = document.getElementById('error');
+    const jobSelect = document.getElementById('jobSelect');
+    const executions = document.getElementById('executions');
+    const jobInfo = document.getElementById('jobInfo');
+
+    const showError = (msg) => { error.textContent = msg || ''; };
+
+    const loadJobs = async () => {
+      try {
+        const res = await fetch('/jobs');
+        if (!res.ok) throw new Error('Could not load jobs');
+        const jobs = await res.json();
+        jobSelect.innerHTML = '<option value="">Select a job</option>';
+        jobs.forEach((job) => {
+          const option = document.createElement('option');
+          option.value = job._id;
+          option.textContent = `${job.name} [${job.status}]`;
+          jobSelect.appendChild(option);
+        });
+        showError('');
+      } catch (err) {
+        showError(err.message);
+        jobSelect.innerHTML = '<option value="">Failed to load jobs</option>';
+      }
+    };
+
+    const loadExecutions = async (jobId) => {
+      if (!jobId) return;
+      try {
+        const res = await fetch(`/jobs/${jobId}/executions`);
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          throw new Error(payload.error || 'Failed to load execution history');
+        }
+        const data = await res.json();
+        jobInfo.textContent = `${data.jobName} (${data.jobId})`;
+        executions.innerHTML = '';
+        if (!data.executions.length) {
+          executions.innerHTML = '<tr><td colspan="5">No executions found yet.</td></tr>';
+          return;
+        }
+        data.executions.forEach((item) => {
+          const start = item.startedAt ? new Date(item.startedAt).toLocaleString() : '-';
+          const finish = item.finishedAt ? new Date(item.finishedAt).toLocaleString() : '-';
+          executions.innerHTML += `<tr><td>${item.status}</td><td>${start}</td><td>${finish}</td><td>${item.error || '-'}</td><td>${new Date(item.createdAt).toLocaleString()}</td></tr>`;
+        });
+        showError('');
+      } catch (err) {
+        showError(err.message);
+      }
+    };
+
+    jobSelect.addEventListener('change', () => loadExecutions(jobSelect.value));
+    document.getElementById('refresh').addEventListener('click', async () => {
+      await loadJobs();
+      if (jobSelect.value) loadExecutions(jobSelect.value);
+    });
+    document.getElementById('clear').addEventListener('click', () => {
+      executions.innerHTML = '';
+      jobInfo.innerHTML = '';
+      showError('');
+    });
+
+    loadJobs();
+  </script>
+</body>
+</html>
