@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/jobs", jobRouter);
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "executionHistory.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 export default app;

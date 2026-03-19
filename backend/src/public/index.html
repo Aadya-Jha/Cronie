@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cronie — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-brand">
+      <span>⏱</span>
+      <span>Cronie</span>
+    </div>
+    <nav class="header-nav">
+      <a href="/" class="nav-link active">Dashboard</a>
+      <a href="/executionHistory.html" class="nav-link">Execution History</a>
+    </nav>
+  </header>
+  <div class="container">
+    <div class="main">
+      <section class="jobs-section">
+        <div class="section-header">
+          <div>
+            <h2>Scheduled Jobs</h2>
+            <p class="section-sub">All your active and pending cron jobs</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadJobs()">↻ Refresh</button>
+        </div>
+
+        <div id="errorBanner" class="error-banner hidden"></div>
+        <div id="jobsContainer"></div>
+      </section>
+      <!-- =====================================================
+           MEMBER 3 — Create Job Form (right panel)
+           Owned by: Member 3
+           API: POST /jobs
+           Replace this entire div with your form-section.
+           ===================================================== -->
+      <div class="form-placeholder">
+        <p>[ Create Job Form ]</p>
+        <p class="placeholder-sub">Member 3's section — POST /jobs</p>
+      </div>
+    </div>
+  </div>
+  <script src="dashboard.js"></script>
+</body>
+</html>
