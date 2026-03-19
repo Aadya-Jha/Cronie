@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+body {
+  font-family: 'Syne', sans-serif !important;
+  background: #0f1117 !important;
+  color: #e2e8f0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.card {
+  background: #161b27 !important;
+  border: 1px solid #2a3347 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4) !important;
+  color: #e2e8f0 !important;
+  max-width: 960px !important;
+  margin: 20px auto !important;
+  padding: 20px !important;
+}
+
+.card h1 {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #e2e8f0 !important;
+  margin-bottom: 4px !important;
+}
+
+.card p {
+  color: #4d5873;
+  font-size: 0.82rem;
+  margin-bottom: 14px;
+}
+
+select {
+  background: #111827 !important;
+  border: 1px solid #2a3347 !important;
+  border-radius: 6px !important;
+  color: #e2e8f0 !important;
+  font-family: 'Syne', sans-serif !important;
+  font-size: 0.85rem !important;
+  padding: 7px 12px !important;
+  outline: none !important;
+  cursor: pointer;
+}
+select:focus { border-color: #7c5cfc !important; }
+
+button {
+  background: #1e293b !important;
+  border: 1px solid #2a3347 !important;
+  border-radius: 6px !important;
+  color: #8b95a8 !important;
+  font-family: 'Syne', sans-serif !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  padding: 7px 14px !important;
+  cursor: pointer !important;
+  transition: all 0.15s !important;
+}
+button:hover {
+  background: #212840 !important;
+  color: #e2e8f0 !important;
+}
+
+#jobInfo {
+  font-size: 0.82rem;
+  color: #4d5873;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+
+table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin-top: 12px !important;
+  font-size: 0.83rem !important;
+}
+
+th {
+  background: #1e293b !important;
+  color: #4d5873 !important;
+  border: 1px solid #2a3347 !important;
+  padding: 9px 12px !important;
+  font-weight: 700 !important;
+  font-size: 0.72rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+
+td {
+  border: 1px solid #2a3347 !important;
+  padding: 9px 12px !important;
+  color: #8b95a8 !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 0.78rem !important;
+}
+
+tr:hover td { background: #1e293b !important; color: #e2e8f0 !important; }
+td:first-child { font-weight: 600 !important; }
+tr:has(td:first-child:-webkit-contains("success")) td:first-child { color: #22c55e !important; }
+tr:has(td:first-child:-webkit-contains("failed"))  td:first-child { color: #ef4444 !important; }
+
+.error { color: #ef4444 !important; font-size: 0.82rem !important; }
+
+.back-link {
+  display: inline-block;
+  margin: 16px 24px 0;
+  font-size: 0.82rem;
+  color: #4d5873;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.back-link:hover { color: #7c5cfc; }
