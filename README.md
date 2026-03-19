@@ -36,7 +36,7 @@ A cron job management platform that lets you create, schedule, and monitor autom
 
 ```bash
 git clone https://github.com/Aadya-Jha/Cronie.git
-cd Cronie/backend
+cd backend
 npm install
 ```
 
@@ -49,7 +49,6 @@ PORT=3000
 MONGO_URI=your_mongodb_uri_here
 ```
 
-> See `.env.example` for reference.
 
 ### Run the server
 
