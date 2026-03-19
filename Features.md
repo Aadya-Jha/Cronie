@@ -19,6 +19,7 @@ Core system responsible for detecting and executing scheduled jobs.
 - Continuous scheduler loop to detect due jobs
 - Trigger job execution at precise scheduled times
 - Execute only active jobs while respecting lifecycle states
+- Integrates safety checks before execution
 
 ---
 
@@ -46,6 +47,7 @@ Track all job executions for debugging and observability.
   - execution status
   - error messages (if any)
 - Maintain historical logs for auditing and troubleshooting
+- Expose execution history via API
 
 ---
 
@@ -57,6 +59,7 @@ Protect the system from misuse and unstable scheduling behavior.
 - Detect invalid cron expressions
 - Enforce execution constraints to avoid extremely frequent schedules
 - Identify overlapping or missed job executions
+- Apply scheduler-level rate limiting to control execution load
 
 ---
 
@@ -76,6 +79,7 @@ Provide visibility into system behavior and job execution results.
 Simple APIs allow applications to integrate automated scheduling easily.
 
 - REST APIs for job management
+- Execution history retrieval APIs
 - Programmatic scheduling of tasks
 - Easy integration with backend services and workflows
 - Designed for infrastructure automation use cases
@@ -89,5 +93,4 @@ Potential improvements for expanding Cronie capabilities.
 - Retry policies for failed jobs
 - Webhook notifications for job completion or failure
 - Role-based access control for job management
-- Rate limiting to prevent excessive scheduling
 - Dashboard UI for monitoring job activity
