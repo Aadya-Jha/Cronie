@@ -1,89 +1,33 @@
-# Tech Stack
+# Cronie — Tech Stack
 
 ## Backend
-
-**Node.js + Express.js**  
-Primary backend framework used to build the API server, handle GitHub webhooks, and process dependency scanning logic.
-
-**Axios**  
-Used for making HTTP requests to external services such as the GitHub API and vulnerability data sources.
-
----
+- **Node.js** — Runtime for building the scheduler and execution engine
+- **Express.js** — REST API framework for job lifecycle management
+- **MongoDB** — Database for storing jobs, execution history, and metadata
+- **Mongoose** — ODM for schema design and database interactions
 
 ## Frontend
+- **React.js** — Interactive dashboard for job management
+- **JavaScript (ES6+)** — Core language for frontend logic
+- **CSS / Tailwind CSS** — Styling and responsive UI design
 
-**React**  
-Used to build the interactive dashboard for visualizing repository risk, vulnerabilities, and dependency insights.
+## Scheduling & Core Logic
+- **Cron Parser Libraries (e.g., node-cron / cron-parser)** — Cron expression parsing and validation
+- **Custom Scheduler Loop** — Continuous job detection and execution system
+- **Axios / Fetch API** — HTTP requests for triggering external endpoints
 
-**Chart.js**  
-Provides visualizations such as risk graphs, version-gap charts, and historical dependency risk trends.
+## DevOps & Deployment
+- **Render** — Cloud deployment platform
+- **GitHub Actions** — CI/CD pipeline for automated builds and deployments
+- **Git & GitHub** — Version control and collaboration
 
-**Tailwind CSS**  
-Utility-first CSS framework used to build responsive and clean UI components for the dashboard.
+## System Features & Architecture
+- **RESTful API Architecture** — Structured endpoints for job operations
+- **Modular Backend Design** — Separation of scheduler, execution, and API layers
+- **Rate Limiting & Safety Controls** — Prevent abuse and ensure stability
+- **Logging & Monitoring** — Execution tracking and system observability
 
----
-
-## AI / Risk Analysis
-
-The platform uses **embedding-based similarity search combined with LLM reasoning** to analyze vulnerabilities in context.
-
-### Embedding + Vector Database
-
-- Vulnerability data is preprocessed into vector embeddings.
-- Embeddings are stored in a vector database such as **Pinecone, Weaviate, or Milvus**.
-- Enables fast similarity search across thousands of vulnerability records.
-
-### AI Query Flow
-
-1. A developer opens the dashboard or triggers a repository scan.
-2. The system extracts repository dependencies.
-3. Dependency data is compared against vulnerability embeddings in the vector database.
-4. Relevant context is sent to an LLM to generate:
-   - Risk explanations
-   - Dependency prioritization
-   - Suggested upgrade paths.
-
-### Advantages
-
-- Scales efficiently across large vulnerability datasets.
-- Enables contextual reasoning instead of simple severity matching.
-- Helps developers understand *why* a dependency is risky and how to fix it.
-
----
-
-## Database
-
-**PostgreSQL**  
-Stores structured application data including:
-
-- Dependency states
-- Risk scores
-- Scan history
-- Repository metadata
-
-**Vector Database**
-
-Stores vulnerability embeddings used for AI-driven similarity search and contextual analysis.
-
-**Redis (Optional)**
-
-Used for caching:
-
-- Dependency lookup results
-- Webhook events
-- Frequently accessed vulnerability data
-
----
-
-## Notifications & Integrations
-
-**GitHub API**
-
-- Fetch repository metadata
-- Create automated GitHub issues for critical vulnerabilities
-- Post comments on pull requests
-
-**Slack API / Microsoft Teams Webhooks**
-
-- Send alerts when high-risk vulnerabilities are detected
-- Notify development teams about important security updates
+## Future Scope (Planned Enhancements)
+- **Retry & Failure Handling Policies**
+- **Role-Based Access Control (RBAC)**
+- **Advanced Monitoring Dashboard**
