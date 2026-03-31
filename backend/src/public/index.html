@@ -43,41 +43,23 @@
         <div id="jobsContainer"></div>
       </section>
 
-      <!-- RIGHT: CREATE JOB -->
+      <!-- RIGHT: CREATE JOB (YOUR PART ONLY) -->
       <section class="form-section">
         <h2>Create Job</h2>
 
         <form id="jobForm" class="job-form">
+          <input type="text" id="name" placeholder="Job Name" required />
 
-          <input 
-            type="text" 
-            id="name" 
-            placeholder="Job Name" 
-            required 
-          />
-
-          <input 
-            type="text" 
-            id="cron" 
-            placeholder="Cron Expression (e.g. */1 * * * *)" 
-            required 
-          />
+          <input type="text" id="cron" placeholder="Cron Expression (e.g. */1 * * * *)" required />
 
           <select id="method">
             <option value="GET">GET</option>
             <option value="POST">POST</option>
           </select>
 
-          <input 
-            type="text" 
-            id="url" 
-            placeholder="Target URL" 
-            required 
-          />
+          <input type="text" id="url" placeholder="Target URL" required />
 
-          <button type="submit" class="btn-primary">
-            Create Job
-          </button>
+          <button type="submit" class="btn-primary">Create Job</button>
         </form>
 
         <p id="message"></p>
@@ -101,7 +83,7 @@
       const httpMethod = document.getElementById("method").value;
       const targetUrl = document.getElementById("url").value.trim();
 
-      // ✅ BASIC VALIDATION
+      // ✅ VALIDATION
       if (!name) {
         message.innerText = "Job name required";
         return;
@@ -132,10 +114,9 @@
         });
 
         if (res.ok) {
-          message.innerText = "Job created successfully!";
+          message.innerText = "✅ Job created successfully!";
           form.reset();
 
-          // refresh jobs list (Member 2 UI)
           if (typeof loadJobs === "function") {
             loadJobs();
           }
@@ -145,11 +126,11 @@
           }, 3000);
 
         } else {
-          message.innerText = "Failed to create job";
+          message.innerText = "❌ Failed to create job";
         }
 
       } catch (err) {
-        message.innerText = "Server error";
+        message.innerText = "⚠️ Server error";
       }
     });
   </script>
