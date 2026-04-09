@@ -29,3 +29,4 @@ jobs:
         env:
           PORT: 3000
           MONGO_URI: ${{ secrets.MONGO_URI }}
+          OPENROUTER_API_KEY: test_key_placeholder
