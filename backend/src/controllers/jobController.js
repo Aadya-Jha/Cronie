@@ -1,15 +1,13 @@
 import Job from "../models/Job.js";
 import Execution from "../models/Execution.js";
-import {
-  getNextRunTime,
-  validateCronExpression,
-} from "../scheduler/cronHelper.js";
+import { getNextRunTime, validateCronExpression } from "../scheduler/cronHelper.js";
+import { validateCronSafety } from '../config/rateLimitConfig.js';
+import { enforceJobLimit } from '../scheduler/userLimiter.js';
 
 const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 
 const parseTargetUrl = (targetUrl) => {
   try {
-    // eslint-disable-next-line no-new
     new URL(targetUrl);
     return true;
   } catch {
@@ -37,6 +35,17 @@ export const createJob = async (req, res) => {
       return res.status(400).json({ error: "Invalid cron expression" });
     }
 
+    const cronCheck = validateCronSafety(cronExpression);
+      if (!cronCheck.valid) {
+        return res.status(400).json({ error: cronCheck.reason });
+      }
+    
+      const userId = req.user?.id;
+      try {
+        await enforceJobLimit(userId);
+      } catch (err) {
+        return res.status(429).json({ error: err.message });
+      }
     if (!parseTargetUrl(targetUrl)) {
       return res.status(400).json({ error: "Invalid targetUrl" });
     }
