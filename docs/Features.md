@@ -1,93 +1,103 @@
-# Cronie — Features
+# Features
 
-## 1. Dynamic Job Scheduling
+## 1. Job Scheduling & Lifecycle Management
 
-Create and manage cron jobs through APIs instead of editing server cron files.
-
-- Create, update, pause, resume, and delete jobs dynamically
-- Support standard cron expressions for flexible scheduling
-- Jobs persist in the database and survive server restarts
-- Centralized scheduling for multiple automated tasks
-
----
-
-## 2. Scheduler Engine
-
-Core system responsible for detecting and executing scheduled jobs.
-
-- Cron expression parsing and validation
-- Continuous scheduler loop to detect due jobs
-- Trigger job execution at precise scheduled times
-- Execute only active jobs while respecting lifecycle states
+- Cron-based job scheduling using standard cron expressions.  
+- Full job lifecycle control: create, update, pause, resume, and delete jobs.  
+- Persistent storage using MongoDB ensures jobs survive server restarts.  
+- Each job stores:
+  - cron expression  
+  - job status  
+  - next run time  
+- User-specific job ownership and isolation.
 
 ---
 
-## 3. Automated Job Execution
+## 2. Scheduler Engine & Execution System
 
-Execute scheduled tasks reliably through a dedicated execution service.
-
-- Perform HTTP API calls as scheduled tasks
-- Handle success, failure, and timeout scenarios
-- Update job metadata such as last run time and execution status
-- Allow automation of periodic backend tasks
-
----
-
-## 4. Execution Tracking & History
-
-Track all job executions for debugging and observability.
-
-- Store execution records for every job run
-- Capture execution metadata including:
-  - executionId
-  - jobId
-  - startTime
-  - endTime
-  - execution status
-  - error messages (if any)
-- Maintain historical logs for auditing and troubleshooting
+- Automated scheduler loop that parses cron expressions and triggers jobs.  
+- HTTP webhook execution support (call external APIs/services).  
+- Dynamic metadata updates:
+  - lastRunTime  
+  - nextRunTime  
+- Reliable execution handling with success and failure tracking.  
+- Prevention of overlapping and duplicate executions.
 
 ---
 
-## 5. Reliability & Safety Controls
+## 3. Execution Tracking & Observability
 
-Protect the system from misuse and unstable scheduling behavior.
-
-- Prevent duplicate executions for the same job
-- Detect invalid cron expressions
-- Enforce execution constraints to avoid extremely frequent schedules
-- Identify overlapping or missed job executions
-
----
-
-## 6. Logging & Observability
-
-Provide visibility into system behavior and job execution results.
-
-- Structured logging for scheduler and execution events
-- Detailed error logs for failed jobs
-- Execution history for monitoring and debugging
-- System logs to analyze scheduler performance
+- Detailed execution history for every job:
+  - executionId  
+  - jobId  
+  - start & end time  
+  - status (pending, running, completed, failed)  
+  - error logs  
+- Execution state transitions for better monitoring.  
+- API to fetch execution history:
+  - `GET /jobs/:jobId/executions`  
+- Improved debugging and system transparency.
 
 ---
 
-## 7. Developer-Friendly APIs
+## 4. Safety, Rate Limiting & Reliability
 
-Simple APIs allow applications to integrate automated scheduling easily.
-
-- REST APIs for job management
-- Programmatic scheduling of tasks
-- Easy integration with backend services and workflows
-- Designed for infrastructure automation use cases
+- Scheduler-level safety controls:
+  - max executions per minute  
+  - max concurrent executions  
+  - minimum cron interval enforcement  
+- Per-user limits:
+  - max jobs per user  
+  - execution rate limits  
+- API rate limiting:
+  - job creation  
+  - login attempts  
+- Cron validation guardrails:
+  - rejects unsafe schedules like `* * * * *`  
+- Protection against misuse, overload, and system abuse.
 
 ---
 
-## 8. Future Enhancements
+## 5. Authentication & Access Control
 
-Potential improvements for expanding Cronie capabilities.
+- Secure user authentication system:
+  - registration & login APIs  
+- Passwords stored securely using hashing.  
+- JWT-based authentication for session management.  
+- Role-based access control:
+  - users can only view/update/delete their own jobs  
+- Middleware-protected APIs for security.
 
-- Retry policies for failed jobs
-- Webhook notifications for job completion or failure
-- Role-based access control for job management
-- Rate limiting to prevent excessive scheduling
-- Dashboard UI for monitoring job activity
+---
+
+## 6. Dashboard & User Interface
+
+- Jobs dashboard:
+  - view all jobs  
+  - pause/resume/delete jobs  
+- Create Job form:
+  - job name  
+  - cron expression  
+  - HTTP method  
+  - target URL  
+- Execution history view for each job.  
+- Real-time reflection of scheduler updates in UI.
+
+---
+
+## 7. AI-Powered Features
+
+- Natural language → cron expression generation (`POST /ai/generate-cron`)  
+- AI-generated explanations for cron schedules.  
+- Validation of generated cron expressions to prevent unsafe jobs.  
+- Reduces user errors and improves usability.
+
+---
+
+## 8. Novelty / Unique Selling Points
+
+- Combines cron scheduling, execution tracking, and AI assistance in one system.  
+- Built-in safety mechanisms prevent misuse and system overload.  
+- Transparent execution tracking with full job history.  
+- AI-assisted cron generation simplifies complex configurations.  
+- Designed for production-like reliability with minimal setup.

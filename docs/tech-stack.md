@@ -2,88 +2,57 @@
 
 ## Backend
 
-**Node.js + Express.js**  
-Primary backend framework used to build the API server, handle GitHub webhooks, and process dependency scanning logic.
-
-**Axios**  
-Used for making HTTP requests to external services such as the GitHub API and vulnerability data sources.
+- Node.js + Express.js — API server, webhook handling, job scheduling logic, and execution engine.
+- Axios — HTTP requests for webhook execution and external integrations.
 
 ---
 
 ## Frontend
 
-**React**  
-Used to build the interactive dashboard for visualizing repository risk, vulnerabilities, and dependency insights.
-
-**Chart.js**  
-Provides visualizations such as risk graphs, version-gap charts, and historical dependency risk trends.
-
-**Tailwind CSS**  
-Utility-first CSS framework used to build responsive and clean UI components for the dashboard.
+- React — dashboard UI for managing jobs and viewing execution history.
+- Chart.js — visualization of execution trends and job activity (optional).
+- Tailwind CSS — responsive styling and clean UI components.
 
 ---
 
-## AI / Risk Analysis
+## AI / Smart Features
 
-The platform uses **embedding-based similarity search combined with LLM reasoning** to analyze vulnerabilities in context.
+**AI-powered cron generation (user-friendly automation)**
 
-### Embedding + Vector Database
+- Converts natural language into cron expressions using LLMs (OpenAI / OpenRouter).
+- API: `POST /ai/generate-cron`
+- Returns:
+  - cron expression  
+  - human-readable explanation  
 
-- Vulnerability data is preprocessed into vector embeddings.
-- Embeddings are stored in a vector database such as **Pinecone, Weaviate, or Milvus**.
-- Enables fast similarity search across thousands of vulnerability records.
+- Flow:
+  1. User enters natural language (e.g., "run every day at 9 AM").
+  2. AI generates cron expression.
+  3. System validates it before saving.
 
-### AI Query Flow
-
-1. A developer opens the dashboard or triggers a repository scan.
-2. The system extracts repository dependencies.
-3. Dependency data is compared against vulnerability embeddings in the vector database.
-4. Relevant context is sent to an LLM to generate:
-   - Risk explanations
-   - Dependency prioritization
-   - Suggested upgrade paths.
-
-### Advantages
-
-- Scales efficiently across large vulnerability datasets.
-- Enables contextual reasoning instead of simple severity matching.
-- Helps developers understand *why* a dependency is risky and how to fix it.
+- Pros:
+  - Reduces user errors  
+  - Simplifies cron configuration  
+  - Improves usability for non-technical users  
 
 ---
 
 ## Database
 
-**PostgreSQL**  
-Stores structured application data including:
+- MongoDB — stores jobs, execution history, user data, and scheduling metadata.
+- Redis (optional) — caching job states, rate limiting, and frequently accessed data.
 
-- Dependency states
-- Risk scores
-- Scan history
-- Repository metadata
+---
 
-**Vector Database**
+## Authentication & Security
 
-Stores vulnerability embeddings used for AI-driven similarity search and contextual analysis.
-
-**Redis (Optional)**
-
-Used for caching:
-
-- Dependency lookup results
-- Webhook events
-- Frequently accessed vulnerability data
+- JWT (JSON Web Tokens) — secure user authentication and session handling.
+- Password hashing — secure storage of user credentials.
+- Middleware-based route protection — ensures only authorized access to APIs.
 
 ---
 
 ## Notifications & Integrations
 
-**GitHub API**
-
-- Fetch repository metadata
-- Create automated GitHub issues for critical vulnerabilities
-- Post comments on pull requests
-
-**Slack API / Microsoft Teams Webhooks**
-
-- Send alerts when high-risk vulnerabilities are detected
-- Notify development teams about important security updates
+- HTTP Webhooks — execute external APIs/services as scheduled jobs.
+- (Optional) Slack / Teams Webhooks — notify users about job execution status or failures.
