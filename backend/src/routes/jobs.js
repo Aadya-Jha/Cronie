@@ -1,5 +1,6 @@
 import express from "express";
 const router = express.Router();
+import authMiddleware from "../middleware/authMiddleware.js";
 import { getJobs, getJob, createJob, pauseJob, resumeJob, updateJob, deleteJob, getExecutionHistory } from "../controllers/jobController.js";
 import { jobCreationLimiter, jobReadLimiter, jobUpdateLimiter, jobDeleteLimiter, jobPauseResumeLimiter } from '../middleware/apiRateLimiter.js';
 import { userJobLimitMiddleware } from '../scheduler/userLimiter.js';
@@ -16,13 +17,71 @@ function cronGuardMiddleware(req, res, next) {
   }
 }
 
-router.post("/", rateLimit(JOB_CREATION_RATE_LIMIT_OPTIONS), jobCreationLimiter, userJobLimitMiddleware, cronGuardMiddleware, createJob);
-router.get("/",  jobReadLimiter, getJobs);
-router.get("/:id/executions", getExecutionHistory);
-router.get("/:id", jobReadLimiter, getJob);
-router.patch("/:id/pause", jobPauseResumeLimiter, pauseJob);
-router.patch("/:id/resume", jobPauseResumeLimiter, resumeJob);
-router.put("/:id", jobUpdateLimiter, updateJob);
-router.delete("/:id", jobDeleteLimiter, deleteJob);
+
+router.post(
+  "/",
+  authMiddleware,
+  rateLimit(JOB_CREATION_RATE_LIMIT_OPTIONS),
+  jobCreationLimiter,
+  userJobLimitMiddleware,
+  cronGuardMiddleware,
+  createJob
+);
+
+
+router.get(
+  "/",
+  authMiddleware,
+  jobReadLimiter,
+  getJobs
+);
+
+
+router.get(
+  "/:id/executions",
+  authMiddleware,
+  getExecutionHistory
+);
+
+
+router.get(
+  "/:id",
+  authMiddleware,
+  jobReadLimiter,
+  getJob
+);
+
+
+router.patch(
+  "/:id/pause",
+  authMiddleware,
+  jobPauseResumeLimiter,
+  pauseJob
+);
+
+
+router.patch(
+  "/:id/resume",
+  authMiddleware,
+  jobPauseResumeLimiter,
+  resumeJob
+);
+
+
+router.put(
+  "/:id",
+  authMiddleware,
+  jobUpdateLimiter,
+  updateJob
+);
+
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  jobDeleteLimiter,
+  deleteJob
+);
+
 
 export default router;

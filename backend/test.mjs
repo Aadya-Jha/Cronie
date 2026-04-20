@@ -1,0 +1,1 @@
+import { CronExpressionParser } from 'cron-parser'; console.log(CronExpressionParser.parse('*/5 * * * *').next().toDate());

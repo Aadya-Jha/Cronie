@@ -1,203 +1,175 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cronie — Dashboard</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cronie — Dashboard</title>
 
-    <link rel="stylesheet" href="style.css" />
-  </head>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <body>
-    <!-- HEADER -->
-    <header class="header">
-      <div class="header-brand">
-        <span>⏱</span>
-        <span>Cronie</span>
-      </div>
+  <link rel="stylesheet" href="style.css" />
+</head>
 
-      <nav class="header-nav">
-        <a href="/" class="nav-link active">Dashboard</a>
-        <a href="/executionHistory.html" class="nav-link">Execution History</a>
-      </nav>
-    </header>
+<body>
 
-    <div class="container">
-      <div class="main">
-        <!-- LEFT: JOBS -->
-        <section class="jobs-section">
-          <div class="section-header">
-            <div>
-              <h2>Scheduled Jobs</h2>
-              <p class="section-sub">All your active and pending cron jobs</p>
-            </div>
-
-            <button class="btn btn-ghost btn-sm" onclick="loadJobs()">
-              ↻ Refresh
-            </button>
-          </div>
-
-          <div id="errorBanner" class="error-banner hidden"></div>
-          <div id="jobsContainer"></div>
-        </section>
-
-        <!-- RIGHT: CREATE JOB (YOUR PART ONLY) -->
-        <section class="form-section">
-          <h2>Create Job</h2>
-
-          <form id="jobForm" class="job-form">
-            <input type="text" id="name" placeholder="Job Name" required />
-
-            <input
-              type="text"
-              id="cron"
-              placeholder="Cron Expression (e.g. */1 * * * *)"
-              required
-            />
-
-            <select id="method">
-              <option value="GET">GET</option>
-              <option value="POST">POST</option>
-            </select>
-
-            <input type="text" id="url" placeholder="Target URL" required />
-
-            <button type="submit" class="btn-primary">Create Job</button>
-          </form>
-
-          <p id="message"></p>
-        </section>
-      </div>
-
-      <!-- AI CRON GENERATOR SECTION -->
-      <section class="ai-generator-section">
-        <div class="ai-header">
-          <h2>AI Cron Generator</h2>
-          <p class="section-sub">Describe your schedule in plain English</p>
-        </div>
-
-        <div class="ai-generator">
-          <div class="ai-input-group">
-            <input
-              type="text"
-              id="aiPromptInput"
-              placeholder="e.g., Run every weekday at 9:30 AM"
-              autocomplete="off"
-            />
-            <button id="aiGenerateBtn" class="btn-primary btn-generate">
-              <span class="btn-text"> Generate</span>
-              <span class="btn-loader hidden">Loading...</span>
-            </button>
-          </div>
-
-          <div id="aiErrorBanner" class="ai-error-banner hidden"></div>
-
-          <div id="aiResultContainer" class="ai-result-container hidden">
-            <div class="ai-result-header">
-              <span class="ai-badge ai-badge-success" id="aiSafetyBadge"
-                >Safe</span
-              >
-              <span class="ai-confidence" id="aiConfidence"></span>
-            </div>
-
-            <div class="ai-cron-display">
-              <code id="aiCronExpression"></code>
-              <button id="aiCopyBtn" class="btn-icon" title="Copy to clipboard">
-                Copy
-              </button>
-            </div>
-
-            <p class="ai-explanation" id="aiExplanation"></p>
-
-            <div class="ai-next-runs">
-              <span class="label">Next runs:</span>
-              <div id="aiNextRunTimes" class="ai-next-times"></div>
-            </div>
-
-            <div id="aiWarningsContainer" class="ai-warnings hidden"></div>
-
-            <div class="ai-actions">
-              <button id="aiUseCronBtn" class="btn-primary btn-sm">
-                Use This Cron
-              </button>
-              <button id="aiRegenerateBtn" class="btn-ghost btn-sm">
-                Regenerate
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-brand">
+      <span>⏱</span>
+      <span>Cronie</span>
     </div>
 
-    <script src="dashboard.js"></script>
+    <nav class="header-nav">
+      <a href="/" class="nav-link active">Dashboard</a>
+      <a href="/executionHistory.html" class="nav-link">Execution History</a>
+    </nav>
+  </header>
 
-    <!-- MEMBER 3 SCRIPT -->
-    <script>
-      const form = document.getElementById("jobForm");
-      const message = document.getElementById("message");
+  <div class="container">
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    <div class="main">
 
-        const name = document.getElementById("name").value.trim();
-        const cronExpression = document.getElementById("cron").value.trim();
-        const httpMethod = document.getElementById("method").value;
-        const targetUrl = document.getElementById("url").value.trim();
+      <!-- LEFT SIDE — JOB LIST -->
+      <section class="jobs-section">
 
-        // ✅ VALIDATION
-        if (!name) {
-          message.innerText = "Job name required";
-          return;
-        }
+        <div class="section-header">
+          <div>
+            <h2>Scheduled Jobs</h2>
+            <p class="section-sub">All your active and pending cron jobs</p>
+          </div>
 
-        if (!cronExpression.includes("*")) {
-          message.innerText = "Invalid cron format";
-          return;
-        }
+          <button class="btn btn-ghost btn-sm" onclick="loadJobs()">
+            ↻ Refresh
+          </button>
+        </div>
 
-        if (!targetUrl.startsWith("http")) {
-          message.innerText = "Invalid URL";
-          return;
-        }
+        <div id="errorBanner" class="error-banner hidden"></div>
+        <div id="jobsContainer"></div>
 
-        try {
-          const res = await fetch("/jobs", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name,
-              cronExpression,
-              httpMethod,
-              targetUrl,
-            }),
-          });
+      </section>
 
-          if (res.ok) {
-            message.innerText = "✅ Job created successfully!";
-            form.reset();
 
-            if (typeof loadJobs === "function") {
-              loadJobs();
-            }
+      <!-- RIGHT SIDE — CREATE JOB -->
+      <section class="form-section">
 
-            setTimeout(() => {
-              message.innerText = "";
-            }, 3000);
-          } else {
-            message.innerText = "❌ Failed to create job";
-          }
-        } catch (err) {
-          message.innerText = "⚠️ Server error";
-        }
-      });
-    </script>
-  </body>
+        <h2>Create Job</h2>
+
+        <form class="job-form" onsubmit="createJob(); return false;">
+
+          <input
+            type="text"
+            id="jobName"
+            placeholder="Job Name"
+            required
+          />
+
+          <input
+            type="text"
+            id="cron"
+            placeholder="Cron Expression (e.g. */5 * * * *)"
+            required
+          />
+
+          <select id="method">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+          </select>
+
+          <input
+            type="text"
+            id="url"
+            placeholder="Target URL"
+            required
+          />
+
+          <button
+            type="submit"
+            id="createJobBtn"
+            class="btn-primary">
+            Create Job
+          </button>
+
+        </form>
+
+        <p id="message"></p>
+
+      </section>
+
+    </div>
+
+
+    <!-- AI CRON GENERATOR -->
+    <section class="ai-generator-section">
+
+      <div class="ai-header">
+        <h2>AI Cron Generator</h2>
+        <p class="section-sub">Describe your schedule in plain English</p>
+      </div>
+
+      <div class="ai-generator">
+
+        <div class="ai-input-group">
+
+          <input
+            type="text"
+            id="aiPromptInput"
+            placeholder="e.g., Run every weekday at 9:30 AM"
+            autocomplete="off"
+          />
+
+          <button id="aiGenerateBtn" class="btn-primary btn-generate">
+            <span class="btn-text">Generate</span>
+            <span class="btn-loader hidden">Loading...</span>
+          </button>
+
+        </div>
+
+        <div id="aiErrorBanner" class="ai-error-banner hidden"></div>
+
+        <div id="aiResultContainer" class="ai-result-container hidden">
+
+          <div class="ai-result-header">
+            <span id="aiSafetyBadge" class="ai-badge ai-badge-success">Safe</span>
+            <span id="aiConfidence" class="ai-confidence"></span>
+          </div>
+
+          <div class="ai-cron-display">
+            <code id="aiCronExpression"></code>
+            <button id="aiCopyBtn" class="btn-icon">Copy</button>
+          </div>
+
+          <p id="aiExplanation" class="ai-explanation"></p>
+
+          <div class="ai-next-runs">
+            <span class="label">Next runs:</span>
+            <div id="aiNextRunTimes" class="ai-next-times"></div>
+          </div>
+
+          <div id="aiWarningsContainer" class="ai-warnings hidden"></div>
+
+          <div class="ai-actions">
+            <button id="aiUseCronBtn" class="btn-primary btn-sm">
+              Use This Cron
+            </button>
+
+            <button id="aiRegenerateBtn" class="btn-ghost btn-sm">
+              Regenerate
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- MAIN DASHBOARD SCRIPT -->
+  <script src="dashboard.js"></script>
+
+</body>
+
 </html>

@@ -1,5 +1,4 @@
-import pkg from 'cron-parser';
-const { CronExpressionParser } = pkg;
+import { CronExpressionParser } from 'cron-parser';
 
 export const validateCronExpression = (cronExpression) => {
   try {

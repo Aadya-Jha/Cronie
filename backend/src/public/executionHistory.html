@@ -95,81 +95,98 @@
       </table>
     </div>
     <script>
-      const error = document.getElementById("error");
-      const jobSelect = document.getElementById("jobSelect");
-      const executions = document.getElementById("executions");
-      const jobInfo = document.getElementById("jobInfo");
+  const error = document.getElementById("error");
+  const jobSelect = document.getElementById("jobSelect");
+  const executions = document.getElementById("executions");
+  const jobInfo = document.getElementById("jobInfo");
 
-      const showError = (msg) => {
-        error.textContent = msg || "";
-      };
+  // Auth guard — redirect to login if no token
+  if (!localStorage.getItem("token")) {
+    window.location.href = "/login.html";
+  }
 
-      const loadJobs = async () => {
-        try {
-          const res = await fetch("/jobs");
-          if (!res.ok) throw new Error("Could not load jobs");
-          const jobs = await res.json();
-          jobSelect.innerHTML = '<option value="">Select a job</option>';
-          jobs.forEach((job) => {
-            const option = document.createElement("option");
-            option.value = job._id;
-            option.textContent = `${job.name} [${job.status}]`;
-            jobSelect.appendChild(option);
-          });
-          showError("");
-        } catch (err) {
-          showError(err.message);
-          jobSelect.innerHTML = '<option value="">Failed to load jobs</option>';
-        }
-      };
+  const authFetch = (url, options = {}) => {
+    return fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+  };
 
-      const loadExecutions = async (jobId) => {
-        if (!jobId) return;
-        try {
-          const res = await fetch(`/jobs/${jobId}/executions`);
-          if (!res.ok) {
-            const payload = await res.json().catch(() => ({}));
-            throw new Error(
-              payload.error || "Failed to load execution history",
-            );
-          }
-          const data = await res.json();
-          jobInfo.textContent = `${data.jobName} (${data.jobId})`;
-          executions.innerHTML = "";
-          if (!data.executions.length) {
-            executions.innerHTML =
-              '<tr><td colspan="5">No executions found yet.</td></tr>';
-            return;
-          }
-          data.executions.forEach((item) => {
-            const start = item.startedAt
-              ? new Date(item.startedAt).toLocaleString()
-              : "-";
-            const finish = item.finishedAt
-              ? new Date(item.finishedAt).toLocaleString()
-              : "-";
-            executions.innerHTML += `<tr><td>${item.status}</td><td>${start}</td><td>${finish}</td><td>${item.error || "-"}</td><td>${new Date(item.createdAt).toLocaleString()}</td></tr>`;
-          });
-          showError("");
-        } catch (err) {
-          showError(err.message);
-        }
-      };
+  const showError = (msg) => {
+    error.textContent = msg || "";
+  };
 
-      jobSelect.addEventListener("change", () =>
-        loadExecutions(jobSelect.value),
-      );
-      document.getElementById("refresh").addEventListener("click", async () => {
-        await loadJobs();
-        if (jobSelect.value) loadExecutions(jobSelect.value);
+  const loadJobs = async () => {
+    try {
+      const res = await authFetch("/jobs");
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login.html";
+        return;
+      }
+      if (!res.ok) throw new Error("Could not load jobs");
+      const jobs = await res.json();
+      jobSelect.innerHTML = '<option value="">Select a job</option>';
+      jobs.forEach((job) => {
+        const option = document.createElement("option");
+        option.value = job._id;
+        option.textContent = `${job.name} [${job.status}]`;
+        jobSelect.appendChild(option);
       });
-      document.getElementById("clear").addEventListener("click", () => {
-        executions.innerHTML = "";
-        jobInfo.innerHTML = "";
-        showError("");
-      });
+      showError("");
+    } catch (err) {
+      showError(err.message);
+      jobSelect.innerHTML = '<option value="">Failed to load jobs</option>';
+    }
+  };
 
-      loadJobs();
-    </script>
+  const loadExecutions = async (jobId) => {
+    if (!jobId) return;
+    try {
+      const res = await authFetch(`/jobs/${jobId}/executions`);
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/login.html";
+        return;
+      }
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload.error || "Failed to load execution history");
+      }
+      const data = await res.json();
+      jobInfo.textContent = `${data.jobName} (${data.jobId})`;
+      executions.innerHTML = "";
+      if (!data.executions.length) {
+        executions.innerHTML = '<tr><td colspan="5">No executions found yet.</td></tr>';
+        return;
+      }
+      data.executions.forEach((item) => {
+        const start = item.startedAt ? new Date(item.startedAt).toLocaleString() : "-";
+        const finish = item.finishedAt ? new Date(item.finishedAt).toLocaleString() : "-";
+        executions.innerHTML += `<tr><td>${item.status}</td><td>${start}</td><td>${finish}</td><td>${item.error || "-"}</td><td>${new Date(item.createdAt).toLocaleString()}</td></tr>`;
+      });
+      showError("");
+    } catch (err) {
+      showError(err.message);
+    }
+  };
+
+  jobSelect.addEventListener("change", () => loadExecutions(jobSelect.value));
+  document.getElementById("refresh").addEventListener("click", async () => {
+    await loadJobs();
+    if (jobSelect.value) loadExecutions(jobSelect.value);
+  });
+  document.getElementById("clear").addEventListener("click", () => {
+    executions.innerHTML = "";
+    jobInfo.innerHTML = "";
+    showError("");
+  });
+
+  loadJobs();
+  </script>
   </body>
 </html>
