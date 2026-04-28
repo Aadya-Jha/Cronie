@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register - Cronie</title>
+  <style>
+    body{
+      font-family:Arial;
+      background:#0f172a;
+      color:white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+    }
+
+    .card{
+      background:#1e293b;
+      padding:30px;
+      border-radius:10px;
+      width:300px;
+    }
+
+    input{
+      width:100%;
+      padding:10px;
+      margin:8px 0;
+      border-radius:6px;
+      border:none;
+    }
+
+    button{
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      background:#6366f1;
+      color:white;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+    }
+
+    .error{
+      color:#f87171;
+      margin-top:10px;
+    }
+
+    a{
+      color:#93c5fd;
+      text-decoration:none;
+      font-size:14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <h2>Create Account</h2>
+
+  <input id="name" placeholder="Name">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <button onclick="register()">Register</button>
+
+  <p class="error" id="error"></p>
+
+  <p style="margin-top:10px">
+    Already have an account? 
+    <a href="/login.html">Login</a>
+  </p>
+
+</div>
+
+<script>
+
+async function register(){
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  const res = await fetch("/auth/register",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({name,email,password})
+  });
+
+  const data = await res.json();
+
+  if(!res.ok){
+    document.getElementById("error").textContent=data.error || "Registration failed";
+    return;
+  }
+
+  alert("Registration successful! Please login.");
+
+  window.location.href="/login.html";
+
+}
+
+</script>
+
+</body>
+</html>

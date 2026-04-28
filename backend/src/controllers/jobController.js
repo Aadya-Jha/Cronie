@@ -2,7 +2,7 @@ import Job from "../models/Job.js";
 import Execution from "../models/Execution.js";
 import { getNextRunTime, validateCronExpression } from "../scheduler/cronHelper.js";
 import { validateCronSafety } from '../config/rateLimitConfig.js';
-import { enforceJobLimit } from '../scheduler/userLimiter.js';
+import { CronExpressionParser } from 'cron-parser';
 
 const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 
@@ -35,17 +35,11 @@ export const createJob = async (req, res) => {
       return res.status(400).json({ error: "Invalid cron expression" });
     }
 
-    const cronCheck = validateCronSafety(cronExpression);
-      if (!cronCheck.valid) {
-        return res.status(400).json({ error: cronCheck.reason });
-      }
-    
-      const userId = req.user?.id;
-      try {
-        await enforceJobLimit(userId);
-      } catch (err) {
-        return res.status(429).json({ error: err.message });
-      }
+    const cronCheck = validateCronSafety(cronExpression, CronExpressionParser);
+    if (!cronCheck.valid) {
+      return res.status(400).json({ error: cronCheck.reason });
+    }
+
     if (!parseTargetUrl(targetUrl)) {
       return res.status(400).json({ error: "Invalid targetUrl" });
     }
@@ -65,6 +59,7 @@ export const createJob = async (req, res) => {
       httpMethod: method,
       status: "active",
       nextRunAt: getNextRunTime(cronExpression),
+      userId: req.userId,
     });
 
     res.status(201).json(job);
@@ -76,9 +71,10 @@ export const createJob = async (req, res) => {
 
 export const getJobs = async (req, res) => {
   try {
-    const jobs = await Job.find({ status: { $ne: "deleted" } }).sort({
-      createdAt: -1,
-    });
+    const jobs = await Job.find({
+      userId: req.userId,
+      status: { $ne: "deleted" },
+    }).sort({ createdAt: -1 });
     res.json(jobs);
   } catch (err) {
     console.error(err);
@@ -88,8 +84,10 @@ export const getJobs = async (req, res) => {
 
 export const getJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
-
+    const job = await Job.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
@@ -101,19 +99,18 @@ export const getJob = async (req, res) => {
 
 export const pauseJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
-
+    const job = await Job.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
-
     if (job.status !== "active") {
       return res.status(409).json({ error: "Job is not active" });
     }
-
     job.status = "paused";
     job.nextRunAt = null;
-
     await job.save();
     res.json(job);
   } catch (err) {
@@ -123,18 +120,18 @@ export const pauseJob = async (req, res) => {
 
 export const resumeJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
+    const job = await Job.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
-
     if (job.status !== "paused") {
       return res.status(409).json({ error: "Job is not paused" });
     }
-
     job.status = "active";
     job.nextRunAt = getNextRunTime(job.cronExpression);
-
     await job.save();
     res.json(job);
   } catch (err) {
@@ -144,23 +141,18 @@ export const resumeJob = async (req, res) => {
 
 export const updateJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
-
+    const job = await Job.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
-
     if (job.status === "deleted") {
       return res.status(409).json({ error: "Cannot update deleted job" });
     }
 
-    const {
-      name,
-      description,
-      cronExpression,
-      targetUrl,
-      httpMethod,
-    } = req.body;
+    const { name, description, cronExpression, targetUrl, httpMethod } = req.body;
 
     if (name !== undefined) job.name = name;
     if (description !== undefined) job.description = description;
@@ -203,15 +195,15 @@ export const updateJob = async (req, res) => {
 
 export const deleteJob = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
-
+    const job = await Job.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
     if (!job) {
       return res.status(404).json({ error: "Job not found" });
     }
-
     job.status = "deleted";
     job.nextRunAt = null;
-
     await job.save();
     res.status(204).send();
   } catch (err) {
@@ -222,21 +214,17 @@ export const deleteJob = async (req, res) => {
 export const getExecutionHistory = async (req, res) => {
   try {
     const { id: jobId } = req.params;
-
-    const job = await Job.findById(jobId);
+    const job = await Job.findOne({
+      _id: jobId,
+      userId: req.userId,
+    });
     if (!job) {
-      return res.status(404).json({ error: "Job not found" });
+      return res.status(404).json({ error: "Job not found or access denied" });
     }
-
     const executions = await Execution.find({ jobId })
       .sort({ createdAt: -1 })
       .select("status startedAt finishedAt error createdAt");
-
-    res.json({
-      jobId,
-      jobName: job.name,
-      executions,
-    });
+    res.json({ jobId, jobName: job.name, executions });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to retrieve execution history" });

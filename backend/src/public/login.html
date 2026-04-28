@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cronie Login</title>
+
+<style>
+
+body{
+  font-family: Arial, sans-serif;
+  background:#0f172a;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+
+.card{
+  background:#1e293b;
+  padding:30px;
+  border-radius:10px;
+  width:320px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+h2{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:none;
+  outline:none;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:12px;
+  background:#6366f1;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:hover{
+  background:#4f46e5;
+}
+
+.error{
+  color:#f87171;
+  margin-top:10px;
+  font-size:14px;
+}
+
+a{
+  color:#93c5fd;
+  text-decoration:none;
+}
+
+.link-text{
+  margin-top:12px;
+  text-align:center;
+  font-size:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Cronie Login</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<p class="link-text">
+Don't have an account?
+<a href="/register.html">Register</a>
+</p>
+
+<p class="error" id="error"></p>
+
+</div>
+
+<script>
+
+if(localStorage.getItem("token")){
+  window.location.href="/";
+}
+
+async function login(){
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const errorEl = document.getElementById("error");
+
+  errorEl.textContent = "";
+
+  if(!email || !password){
+    errorEl.textContent = "Please enter email and password";
+    return;
+  }
+
+  try{
+
+    const res = await fetch("/auth/login",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      errorEl.textContent = data.error || "Login failed";
+      return;
+    }
+
+    localStorage.setItem("token", data.token);
+
+    window.location.href="/";
+
+  }catch(err){
+    errorEl.textContent = "Server error. Please try again.";
+  }
+
+}
+
+document.addEventListener("keydown",(e)=>{
+  if(e.key === "Enter"){
+    login();
+  }
+});
+
+</script>
+
+</body>
+</html>

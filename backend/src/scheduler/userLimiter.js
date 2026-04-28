@@ -77,7 +77,7 @@ export async function enforceJobLimit(userId) {
 }
 
 export function userExecutionLimiterMiddleware(req, res, next) {
-  const userId = req.user?._id?.toString() ?? req.user?.id?.toString();
+  const userId = req.userId?.toString();  // ← fixed: was req.user?._id
 
   if (!userId) {
     return res.status(401).json({ success: false, error: 'Unauthorized.' });
@@ -97,7 +97,7 @@ export function userExecutionLimiterMiddleware(req, res, next) {
 }
 
 export async function userJobLimitMiddleware(req, res, next) {
-  const userId = req.user?._id?.toString() ?? req.user?.id?.toString();
+  const userId = req.userId?.toString();  // ← fixed: was req.user?._id
 
   if (!userId) {
     return res.status(401).json({ success: false, error: 'Unauthorized.' });
