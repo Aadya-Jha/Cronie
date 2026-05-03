@@ -16,6 +16,7 @@ export const startScheduler = () => {
       const rawJobs = await Job.find({
         status: "active",
         nextRunAt: { $lte: now },
+        userId: { $exists: true, $ne: null },
       });
 
       const dueJobs = filterJobsForTick(rawJobs);

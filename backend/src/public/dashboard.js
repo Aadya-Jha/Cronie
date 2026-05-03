@@ -93,10 +93,15 @@ async function createJob(){
       })
     });
 
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = null;
+    }
 
     if(!res.ok){
-      throw new Error(data.error || "Failed to create job");
+      throw new Error(data?.error || "Failed to create job");
     }
 
     await loadJobs();

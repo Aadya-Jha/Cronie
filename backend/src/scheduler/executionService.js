@@ -1,6 +1,7 @@
 import { startExecutionTracking, transitionToRunning, updateExecutionStatus } from "./executionTracker.js";
 import axios from "axios";
 import { getNextRunTime } from "./cronHelper.js";
+import Job from "../models/Job.js";
 import Execution from "../models/Execution.js";
 import { enforceExecutionLimit } from './userLimiter.js';
 import { acquireSlot, releaseSlot, canDispatch } from './globalLimiter.js';
@@ -51,6 +52,12 @@ export const executeJob = async (job) => {
   }
 
   try {
+    if (!job.userId) {
+      console.warn(`[executionService] Job ${job._id} missing userId — skipping execution`);
+      await updateExecutionStatus(executionId, "failed", "Missing userId");
+      return;
+    }
+
     await transitionToRunning(executionId);
 
     await axios({
@@ -61,17 +68,25 @@ export const executeJob = async (job) => {
 
     await updateExecutionStatus(executionId, "completed");
     const nextRunAt = getNextRunTime(job.cronExpression);
-    job.nextRunAt = nextRunAt;
-    job.lastRunAt = new Date();
-    job.lastRunStatus = "completed";
-    await job.save();
+    await Job.updateOne(
+      { _id: job._id },
+      {
+        nextRunAt,
+        lastRunAt: new Date(),
+        lastRunStatus: "completed",
+      }
+    );
   } catch (error) {
     await updateExecutionStatus(executionId, "failed", error.message);
-    job.lastRunAt = new Date();
-    job.lastRunStatus = "failed";
-    job.lastError = error.message;
-    job.nextRunAt = getNextRunTime(job.cronExpression);
-    await job.save();
+    await Job.updateOne(
+      { _id: job._id },
+      {
+        lastRunAt: new Date(),
+        lastRunStatus: "failed",
+        lastError: error.message,
+        nextRunAt: getNextRunTime(job.cronExpression),
+      }
+    );
   } finally {
     releaseSlot();
   }
